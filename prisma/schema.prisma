@@ -12,11 +12,13 @@ model User {
   username      String         @unique
   email         String         @unique
   password      String
-  rooms         RoomUser[]       // relacionamento com RoomUser (usuario participa de várias salas)
+  rooms         RoomUser[]     @relation("UserAsParticipant")
+  ownedRooms    RoomUser[]     @relation("UserAsOwner")
   messages      Message[]
   notifications Notification[]
   createdAt     DateTime       @default(now())
 }
+
 
 model Room {
   id            String         @id @default(uuid())
@@ -31,12 +33,16 @@ model RoomUser {
   id        String   @id @default(uuid())
   userId    String
   roomId    String
-  user      User     @relation(fields: [userId], references: [id])
+  ownerId   String
+
+  user      User     @relation("UserAsParticipant", fields: [userId], references: [id])
+  owner     User     @relation("UserAsOwner", fields: [ownerId], references: [id])
   room      Room     @relation(fields: [roomId], references: [id])
   joinedAt  DateTime @default(now())
 
   @@unique([userId, roomId])
 }
+
 
 model Message {
   id            String         @id @default(uuid())
