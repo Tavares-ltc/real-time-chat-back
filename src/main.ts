@@ -10,6 +10,14 @@ async function bootstrap() {
       .setTitle('Real Time Chat API')
       .setDescription('API documentation for the Real Time Chat project')
       .setVersion('1.0')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+        'access-token',
+      )
       .addTag('chat')
       .build();
 

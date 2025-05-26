@@ -40,10 +40,8 @@ describe('UserService', () => {
 
     const hashedPassword = 'hashed_password';
 
-    // mock do bcrypt
     jest.spyOn(bcrypt, 'hash').mockImplementation(async () => hashedPassword);
 
-    // mock do prisma
     const mockUser = {
       id: 'uuid',
       username: createUserDto.username,

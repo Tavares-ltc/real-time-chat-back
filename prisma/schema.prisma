@@ -13,17 +13,18 @@ model User {
   email         String         @unique
   password      String
   rooms         RoomUser[]     @relation("UserAsParticipant")
-  ownedRooms    RoomUser[]     @relation("UserAsOwner")
+  ownedRooms    Room[]         @relation("OwnerRooms")
   messages      Message[]
   notifications Notification[]
   createdAt     DateTime       @default(now())
 }
 
-
 model Room {
   id            String         @id @default(uuid())
   name          String
-  users         RoomUser[]       // relacionamento com RoomUser (sala tem vários usuários)
+  ownerId       String
+  owner         User           @relation("OwnerRooms", fields: [ownerId], references: [id])
+  users         RoomUser[]     @relation("RoomToRoomUser")
   messages      Message[]
   notifications Notification[]
   createdAt     DateTime       @default(now())
@@ -33,16 +34,12 @@ model RoomUser {
   id        String   @id @default(uuid())
   userId    String
   roomId    String
-  ownerId   String
-
   user      User     @relation("UserAsParticipant", fields: [userId], references: [id])
-  owner     User     @relation("UserAsOwner", fields: [ownerId], references: [id])
-  room      Room     @relation(fields: [roomId], references: [id])
+  room      Room     @relation("RoomToRoomUser", fields: [roomId], references: [id])
   joinedAt  DateTime @default(now())
 
   @@unique([userId, roomId])
 }
-
 
 model Message {
   id            String         @id @default(uuid())
@@ -62,6 +59,20 @@ model Notification {
   messageId String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id])
+  message   Message  @relation(fields: [messageId], references: [id])
+}
+
+model invites {
+  id          String   @id @default(uuid())
+  userId      String
+  invitedUserId String
+  room String //optional
+  type      Boolean  @default(false) //friend or room
+  isAccepted Boolean  @default(false)
+  createdAt   DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
   room      Room     @relation(fields: [roomId], references: [id])
