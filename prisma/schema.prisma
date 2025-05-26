@@ -64,17 +64,3 @@ model Notification {
   room      Room     @relation(fields: [roomId], references: [id])
   message   Message  @relation(fields: [messageId], references: [id])
 }
-
-model invites {
-  id          String   @id @default(uuid())
-  userId      String
-  invitedUserId String
-  room String //optional
-  type      Boolean  @default(false) //friend or room
-  isAccepted Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id])
-  room      Room     @relation(fields: [roomId], references: [id])
-  message   Message  @relation(fields: [messageId], references: [id])
-}

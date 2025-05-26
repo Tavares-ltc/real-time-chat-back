@@ -55,6 +55,11 @@ findOne(id: string, userId: string): Promise<Room | null> {
     return this.prisma.room.delete({ where: { id } })
   }
 
+  async exists(roomId: string): Promise<boolean> {
+  const room = await this.prisma.room.findUnique({ where: { id: roomId } });
+  return !!room;
+}
+
   async isOwner(roomId: string, userId: string): Promise<boolean> {
   const room = await this.prisma.room.findUnique({
     where: { id: roomId },
