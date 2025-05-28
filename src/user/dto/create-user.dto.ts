@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'john_doe', description: 'Unique username' })
@@ -9,4 +9,7 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'strongPassword123', description: 'User password' })
   password: string;
+
+  @ApiPropertyOptional({ example: 'https://example.com/avatar.png', description: 'URL of user profile image' })
+  image?: string;
 }

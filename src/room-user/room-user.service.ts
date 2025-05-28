@@ -7,7 +7,7 @@ import { Prisma } from '@prisma/client';
 export class RoomUserService {
   constructor(private prisma: PrismaService) {}
 
-  async addUserToRoom(data: CreateRoomUserDto) {
+  async addUserToRoom(data: {userId: string, roomId: string}) {
     return this.prisma.roomUser.create({
       data,
     });

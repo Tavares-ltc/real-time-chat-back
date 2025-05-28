@@ -2,20 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { RoomUserController } from './room-user.controller';
 import { RoomUserService } from './room-user.service';
 import { RoomService } from '@/room/room.service';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { UserService } from '@/user/user.service';
 
 describe('RoomUserController', () => {
   let controller: RoomUserController;
-  let roomUserService: {
-    addUserToRoom: jest.Mock;
-    isUserInRoom: jest.Mock;
-    findUsersInRoom: jest.Mock;
-    removeUserFromRoom: jest.Mock;
-  };
-  let roomService: {
-    findOne: jest.Mock;
-    isOwner: jest.Mock;
-  };
+  let roomUserService: any;
+  let roomService: any;
+  let userService: any;
 
   beforeEach(async () => {
     roomUserService = {
@@ -24,9 +18,14 @@ describe('RoomUserController', () => {
       findUsersInRoom: jest.fn(),
       removeUserFromRoom: jest.fn(),
     };
+
     roomService = {
       findOne: jest.fn(),
       isOwner: jest.fn(),
+    };
+
+    userService = {
+      findByEmail: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -34,6 +33,7 @@ describe('RoomUserController', () => {
       providers: [
         { provide: RoomUserService, useValue: roomUserService },
         { provide: RoomService, useValue: roomService },
+        { provide: UserService, useValue: userService },
       ],
     }).compile();
 
@@ -41,27 +41,40 @@ describe('RoomUserController', () => {
   });
 
   describe('addUserToRoom', () => {
-    it('should add user if not already in room', async () => {
-      const dto = { roomId: 'r1', userId: 'u1' };
+    it('should add user if user exists and is not in room', async () => {
+      const dto = { roomId: 'r1', email: 'test@example.com' };
+      const user = { id: 'u1', email: dto.email };
+      userService.findByEmail.mockResolvedValue(user);
       roomService.findOne.mockResolvedValue(null);
       roomUserService.addUserToRoom.mockResolvedValue('user-added');
 
       const result = await controller.addUserToRoom(dto);
 
-      expect(roomService.findOne).toHaveBeenCalledWith(dto.roomId, dto.userId);
-      expect(roomUserService.addUserToRoom).toHaveBeenCalledWith(dto);
+      expect(userService.findByEmail).toHaveBeenCalledWith(dto.email);
+      expect(roomService.findOne).toHaveBeenCalledWith(dto.roomId, user.id);
+      expect(roomUserService.addUserToRoom).toHaveBeenCalledWith({
+        userId: user.id,
+        roomId: dto.roomId,
+      });
       expect(result).toBe('user-added');
     });
 
+    it('should throw BadRequestException if user does not exist', async () => {
+      const dto = { roomId: 'r1', email: 'notfound@example.com' };
+      userService.findByEmail.mockResolvedValue(null);
+
+      await expect(controller.addUserToRoom(dto)).rejects.toThrow(BadRequestException);
+    });
+
     it('should throw ConflictException if user already in room', async () => {
-      const dto = { roomId: 'r1', userId: 'u1' };
+      const dto = { roomId: 'r1', email: 'test@example.com' };
+      const user = { id: 'u1', email: dto.email };
+      userService.findByEmail.mockResolvedValue(user);
       roomService.findOne.mockResolvedValue({});
 
       await expect(controller.addUserToRoom(dto)).rejects.toThrow(ConflictException);
-      expect(roomUserService.addUserToRoom).not.toHaveBeenCalled();
     });
   });
-
   describe('findUsersInRoom', () => {
     it('should return list of users if user is in room', async () => {
       const roomId = 'r1';

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessageService } from '@/message/message.service';
+import { UserService } from '@/user/user.service';
 
 @WebSocketGateway({
   namespace: '/messages',
@@ -18,7 +19,10 @@ import { MessageService } from '@/message/message.service';
 export class MessageGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
 
-  constructor(private readonly messageService: MessageService) {}
+  constructor(
+    private readonly messageService: MessageService,
+    private readonly userService: UserService
+  ) {}
 
   afterInit(server: Server) {
     console.log('MessageGateway initialized');
@@ -42,6 +46,11 @@ export class MessageGateway implements OnGatewayInit, OnGatewayConnection, OnGat
     );
 
     this.server.to(data.roomId).emit('messageReceived', message);
+  }
+  
+  @SubscribeMessage('*')
+  handleAllEvents(@MessageBody() data: any, @ConnectedSocket() client: Socket, @MessageBody() event: string) {
+    console.log(`Evento recebido: ${event}`, data);
   }
 
   @SubscribeMessage('joinRoom')

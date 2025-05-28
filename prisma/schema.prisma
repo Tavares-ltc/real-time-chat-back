@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "windows"]
 }
 
 datasource db {
@@ -12,6 +13,7 @@ model User {
   username      String         @unique
   email         String         @unique
   password      String
+  img           String?      
   rooms         RoomUser[]     @relation("UserAsParticipant")
   ownedRooms    Room[]         @relation("OwnerRooms")
   messages      Message[]

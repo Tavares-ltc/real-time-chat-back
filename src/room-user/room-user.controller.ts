@@ -6,6 +6,7 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { RoomService } from '@/room/room.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload } from '@/auth/interfaces/jwt-payload.interface';
+import { UserService } from '@/user/user.service';
 
 @ApiTags('Room Users')
 @ApiBearerAuth('access-token')
@@ -14,7 +15,8 @@ import { JwtPayload } from '@/auth/interfaces/jwt-payload.interface';
 export class RoomUserController {
   constructor(
     private readonly roomUserService: RoomUserService,
-    private readonly roomService: RoomService
+    private readonly roomService: RoomService,
+    private readonly userService: UserService
   ) {}
 
   @Post()
@@ -22,11 +24,15 @@ export class RoomUserController {
   @ApiResponse({ status: 201, description: 'User successfully added to the room' })
   @ApiResponse({ status: 400, description: 'Invalid data or user already in room' })
   async addUserToRoom(@Body() dto: CreateRoomUserDto) {
-    const isAlreadyIn = await this.roomService.findOne(dto.roomId, dto.userId)
+    const user = await this.userService.findByEmail(dto.email)
+    if(!user){
+      throw new BadRequestException('User not found')
+    }
+    const isAlreadyIn = await this.roomService.findOne(dto.roomId, user.id)
     if (isAlreadyIn) {
       throw new ConflictException('User already in room')
     }
-    return this.roomUserService.addUserToRoom(dto);
+    return this.roomUserService.addUserToRoom({ userId: user.id, roomId: dto.roomId });
   }
 
   @Get(':roomId')

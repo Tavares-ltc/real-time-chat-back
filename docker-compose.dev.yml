@@ -1,21 +1,22 @@
-version: "3.8"
+version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
     ports:
       - "3000:3000"
     environment:
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: realTimeChatPassword
-      POSTGRES_DB: realTimeChat
+      DATABASE_URL: "postgresql://postgres:realTimeChatPassword@db:5432/realTimeChat?schema=public"
+      BCRYPT_SALT_ROUNDS: "10"
+      JWT_SECRET: "secret_token"
     depends_on:
       - db
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+
   db:
     image: postgres:15-alpine
     restart: always

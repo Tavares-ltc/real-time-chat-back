@@ -35,6 +35,6 @@ export class MessageController {
         if(!isUserInRoom){
            throw new UnauthorizedException()
         }
-    return this.messageService.findAllByRoom(roomId);
+    return this.messageService.findAllMessagesByRoom(roomId);
   }
 }

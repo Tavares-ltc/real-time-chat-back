@@ -10,7 +10,7 @@ describe('MessageController', () => {
   let roomUserService: RoomUserService;
 
   const mockMessageService = {
-    findAllByRoom: jest.fn(),
+    findAllMessagesByRoom: jest.fn(),
   };
 
   const mockRoomUserService = {
@@ -42,12 +42,12 @@ describe('MessageController', () => {
     it('should return messages if user is in room', async () => {
       const mockMessages = [{ text: 'Hello' }];
       mockRoomUserService.isUserInRoom.mockResolvedValue(true);
-      mockMessageService.findAllByRoom.mockResolvedValue(mockMessages);
+      mockMessageService.findAllMessagesByRoom.mockResolvedValue(mockMessages);
 
       const result = await controller.findAll(roomId, mockUser);
 
       expect(roomUserService.isUserInRoom).toHaveBeenCalledWith(roomId, mockUser.userId);
-      expect(messageService.findAllByRoom).toHaveBeenCalledWith(roomId);
+      expect(messageService.findAllMessagesByRoom).toHaveBeenCalledWith(roomId);
       expect(result).toEqual(mockMessages);
     });
 

@@ -75,7 +75,7 @@ describe('MessageService', () => {
 
       mockPrisma.message.findMany.mockResolvedValue(messages);
 
-      const result = await service.findAllByRoom(roomId);
+      const result = await service.findAllMessagesByRoom(roomId);
 
       expect(prisma.message.findMany).toHaveBeenCalledWith({
         where: { roomId },

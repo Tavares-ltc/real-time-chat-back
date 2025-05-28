@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UserResponseDto {
   @ApiProperty({ example: 'a3e1b2d4-5678-90ab-cdef-1234567890ab', description: 'User unique identifier' })
@@ -12,4 +12,7 @@ export class UserResponseDto {
 
   @ApiProperty({ example: '2025-05-22T22:13:56.000Z', description: 'Date when user was created' })
   createdAt: Date;
+
+  @ApiPropertyOptional({ example: 'https://example.com/avatar.png', description: 'URL of user profile image' })
+  image?: string;
 }
